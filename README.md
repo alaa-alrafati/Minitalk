@@ -3,10 +3,10 @@
 # 📡 minitalk
 
 ## 📝 Description
-The **minitalk** project is a client-server communication program written in C using UNIX signals (`SIGUSR1` and `SIGUSR2`). The server starts up, prints its Process ID (`PID`), and waits to receive text messages sent bit by bit from a client process.
+The **minitalk** project is a client-server communication program written in C using UNIX signals (`SIGUSR1` and `SIGUSR2`). The server starts up, prints its Process ID (`PID`), and reconstructs messages sent bit by bit from a client, using signal acknowledgments (`ACK`) to keep transmission reliable.
 
 ### 💡 What did I learn from the project
-Working on **minitalk** taught me how Inter-Process Communication (IPC) works using UNIX signals, bitwise operations, and `sigaction` / `PID` handling. I also practiced keeping signal handlers safe and minimal, avoiding race conditions or lost signals, and following the Norminette.
+Working on **minitalk** taught me how Inter-Process Communication (IPC) works using UNIX signals, bitwise operations, and `sigaction` (`SA_SIGINFO`). I also learned how to synchronize bit-by-bit transmission with acknowledgment signals, isolate active client sessions using `client_pid`, handle null-terminated message endings (`'\0'`), and follow the Norminette.
 
 ## ⚙️ Instructions
 1. `cd minitalk` (or navigate to the project directory)
@@ -21,9 +21,10 @@ Working on **minitalk** taught me how Inter-Process Communication (IPC) works us
    - `make re` : Rebuilds both programs from scratch.
 
 ## 🛠️ Key Features
-- **Bitwise Signal Transmission**: Encodes characters into binary bits and transmits them using `SIGUSR1` and `SIGUSR2`.
-- **PID-Based Client-Server Flow**: Connects clients directly to a running server using its process ID.
-- **Clean Error & Signal Handling**: Validates arguments and `PID`s safely and keeps the server running continuously for multiple messages.
+- **Bit-by-Bit Signals**: Sends each character bit by bit using `SIGUSR2` (`1`) and `SIGUSR1` (`0`), and finishes with `'\0'`.
+- **Step-by-Step Confirmation**: The server replies with `SIGUSR1` after each bit so no signals get lost.
+- **One Client at a Time**: Ignores other senders until the current client finishes its message.
+- **Input Checks**: Makes sure arguments and the server `PID` are valid before sending.
 
 ## 🔗 Resources
 - [Linux man pages: signal(7)](https://man7.org/linux/man-pages/man7/signal.7.html)
